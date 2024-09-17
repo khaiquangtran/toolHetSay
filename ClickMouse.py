@@ -1,27 +1,34 @@
 from pynput.mouse import Button, Controller
 from ShootAngle import Coordinate
-
 import time
 
 class ClickMouse:
     def __init__(self, point : Coordinate):
-        self.pointClick = point
-        self.mouse = Controller()
+        self.__pointClick = point
+        self.__mouse = Controller()
 
-    def moveCursorToClickpoint(self):
-        self.mouse.position = (self.pointClick.mX, self.pointClick.mY)
+    def __moveCursorToClickpoint(self):
+        self.__mouse.position = (self.__pointClick.x, self.__pointClick.y)
 
     @property
     def timeShooting(self):
-        return self.mTime
+        return self.__mTime
 
     @timeShooting.setter
     def timeShooting(self, value : float):
-        self.mTime = value
+        self.__mTime = value
 
     @property
     def shooting(self):
-        self.moveCursorToClickpoint()
-        self.mouse.press(Button.left)
-        time.sleep(self.mTime)
-        self.mouse.release(Button.left)
+        self.__moveCursorToClickpoint()
+        self.__mouse.press(Button.left)
+        time.sleep(self.__mTime)
+        self.__mouse.release(Button.left)
+
+
+# Testing
+
+# p = Coordinate(500, 400)
+# click = ClickMouse(p)
+# click.timeShooting = 3
+# click.shooting

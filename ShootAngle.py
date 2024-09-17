@@ -53,10 +53,20 @@ class ShootAngle:
     __mX2 = 0.0
     def __init__(self, point1 : Coordinate, point2 : Coordinate):
         self.__mPoint1and2 = Distance(point1 , point2)
+        self.__mAngle = self.__calculateAngle()
+        assert self.__mAngle > 0 , print(f"Invalid angle calculation.")
 
     def __repr__(self):
         return f"{self.__class__.__name__} ['point1 {self.__mPoint1and2.point1}, point2 {self.__mPoint1and2.point2}, \
-angle {round(self.calculateAngle, 2)} degrees, time {self.convertAngleToTime} s']"
+angle {round(self.__mAngle, 2)} degrees, time {self.convertAngleToTime} s']"
+
+    @classmethod
+    def Vo(cls):
+        return cls.__mVo
+
+    @classmethod
+    def g(cls):
+        return cls.__mG
 
     # solve quadratic equation
     def __calculateAParameter(self):
@@ -94,16 +104,23 @@ angle {round(self.calculateAngle, 2)} degrees, time {self.convertAngleToTime} s'
     # convert Angle to Shot time
     @property
     def convertAngleToTime(self):
-        assert self.__calculateAngle() > 0 , print(f"Angle is invalid.")
-        time = self.__calculateAngle()/90
+        time = self.__mAngle/90
         return round(time,2)
 
     @property
     def getDistance(self):
         return self.__mPoint1and2.distance
 
+    @property
+    def angle(self):
+        return self.__mAngle
 
-p1 = Coordinate(1, 2)
-p2 = Coordinate(3, 4)
-p3 = ShootAngle(p1, p2)
-print(p3.getDistance)
+    @property
+    def point1and2(self):
+        return self.__mPoint1and2
+# Testing
+
+# p1 = Coordinate(1, 2)
+# p2 = Coordinate(3, 4)
+# p3 = ShootAngle(p1, p2)
+# print(p3.getDistance)

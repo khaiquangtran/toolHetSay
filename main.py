@@ -13,48 +13,46 @@ import sys
 # x, y = position
 # print(f"Current mouse position is x = {x} y = {y}")
 
-def main(argv : int):
-
-    for i in range(argv):
-
-        image = ProcessImage()
-
-        screenshot = pyautogui.screenshot()
-        personShot = Coordinate(0, 0)
-        image.inputImage(screenshot)
-
-        if image.isPersonShoot():
-            if image.isShield():
-                personShot = image.getPositionPersonShoot(True)
-            else:
-                personShot = image.getPositionPersonShoot(False)
+def main():
+    image = ProcessImage()
+    screenshot = pyautogui.screenshot()
+    personShot = Coordinate(0, 0)
+    image.inputImage(screenshot)
+    if image.isPersonShoot():
+        if image.isShield():
+            personShot = image.getPositionPersonShoot(True)
         else:
-            continue
+            personShot = image.getPositionPersonShoot(False)
+    else:
+        return
+    if image.isShooter() == False:
+        return
+    if image.isWaterFall():
+        exit()
+    shoot = ShootAngle(image.getPositionShooter(), personShot)
+    print(shoot)
+    image.drawParabol(shoot.angle, ShootAngle.Vo(), ShootAngle.g(), int(shoot.point1and2.deltaPointY), int(shoot.point1and2.deltaPointX))
 
-        if image.isShooter == False:
-            continue
-        if image.isWaterFall():
-            exit()
-        test = ShootAngle(image.getPositionShooter(), personShot)
-
-        click = ClickMouse(image.getPositionShooter())
-        click.timeShooting = test.convertAngleToTime
-        if image.isBall():
-            for i in range(10):
-                screenshot = pyautogui.screenshot()
-                image.inputImage(screenshot)
-                if image.isBallShoot():
-                    time.sleep(0.1)
-                    click.shooting
-                    break
-                time.sleep(0.1)
-        else:
-            click.shooting
-        time.sleep(2)
+    # click = ClickMouse(image.getPositionShooter())
+    # click.timeShooting = shoot.convertAngleToTime
+    # if image.isBall():
+    #     for i in range(10):
+    #         screenshot = pyautogui.screenshot()
+    #         image.inputImage(screenshot)
+    #         if image.isBallShoot():
+    #             time.sleep(0.1)
+    #             click.shooting
+    #             break
+    #         time.sleep(0.1)
+    # else:
+    #     click.shooting
+    # time.sleep(2)
 
 if __name__ == "__main__":
     # print(sys.argv[1])
     if len(sys.argv) <= 1:
-        main(10)
+        for i in range(1):
+            main()
     else:
-        main(int(sys.argv[1]))
+        for i in range(int(sys.argv[1])):
+            main()
