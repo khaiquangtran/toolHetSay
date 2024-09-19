@@ -46,6 +46,10 @@ class Distance:
     def distance(self):
         return math.sqrt(pow(self.deltaPointX, 2) + pow(self.deltaPointY, 2))
 
+    @classmethod
+    def calcDistance(cls, p1 : Coordinate, p2 : Coordinate):
+        return math.sqrt((p2.x - p1.x)**2 + (p2.y - p1.y)**2)
+
 class ShootAngle:
     __mVo = 850 # uint (pixel/s)
     __mG = 600 # uint (pixel/s^2)

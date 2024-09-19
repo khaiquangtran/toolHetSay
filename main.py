@@ -16,13 +16,13 @@ def main():
         return
 
     if image.isShield() and image.isPersonShoot():
-        personShot = image.getPositionPersonShoot(True)
+        personShot = image.getPositionVictim(True)
     else:
-        personShot = image.getPositionPersonShoot(False)
+        personShot = image.getPositionVictim(False)
     shoot = ShootAngle(image.getPositionShooter(), personShot)
 
     # print(shoot)
-    image.drawObject(shoot.angle, ShootAngle.Vo(), ShootAngle.g(), int(shoot.point1and2.deltaPointY), int(shoot.point1and2.deltaPointX))
+    image.detectObject(shoot.angle, int(shoot.point1and2.deltaPointY), int(shoot.point1and2.deltaPointX))
 
     if image.isWaterFall():
         exit()
