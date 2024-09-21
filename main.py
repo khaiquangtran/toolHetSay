@@ -9,35 +9,35 @@ import time
 import sys
 
 def main():
+    start_time = time.time()
     image = ProcessImage()
     screenshot = pyautogui.screenshot()
     personShot = Coordinate(0, 0)
     if image.inputImage(screenshot) == False:
         return
 
-    if image.isShield() and image.isPersonShoot():
+    if image.isShield():
         personShot = image.getPositionVictim(True)
     else:
         personShot = image.getPositionVictim(False)
     shoot = ShootAngle(image.getPositionShooter(), personShot)
 
-    # print(shoot)
-    image.detectObject(shoot.angle, int(shoot.point1and2.deltaPointY), int(shoot.point1and2.deltaPointX))
+    image.detectObject(shoot)
 
     if image.isWaterFall():
         exit()
     click = ClickMouse(image.getPositionShooter())
-    click.timeShooting = shoot.convertAngleToTime
+    click.timeShooting = shoot.time
     if image.isBall():
-        exit()
-        # for i in range(10):
-        #     screenshot = pyautogui.screenshot()
-        #     image.inputImage(screenshot)
-        #     if image.isBallShoot():
-        #         time.sleep(0.1)
-        #         click.shooting
-        #         break
-        #     time.sleep(0.1)
+        phi1 = (shoot.time * 360 )/ 3
+        phi2 = image.phi
+        phiTarget = 130
+        delayTime = ((360 - phi1 - phi2 - phiTarget) * 3) / 360
+        end_time = time.time()
+        executionTime = end_time - start_time
+        delayTime = round((delayTime - executionTime), 2)
+        time.sleep(delayTime)
+        click.shooting
     else:
         click.shooting
     time.sleep(2)

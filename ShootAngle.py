@@ -1,130 +1,110 @@
 import math
 
 class Coordinate:
-    def __init__(self, x : int, y : int):
-        self.__mX = x
-        self.__mY = y
+    """Represents a point in a 2D coordinate system."""
 
-    @property
-    def x(self):
-        return self.__mX
-    @x.setter
-    def x(self, value):
-        self.__mX = value
-
-    @property
-    def y(self):
-        return self.__mY
-    @y.setter
-    def y(self, value):
-        self.__mY = value
+    def __init__(self, x: int, y: int):
+        self.x = x
+        self.y = y
 
     def __repr__(self):
-        return f"{self.__class__.__name__} ('x {self.x} y {self.y}')"
+        return f"Coordinate(x={self.x}, y={self.y})"
 
 class Distance:
-    def __init__(self, point1 : Coordinate, point2 : Coordinate):
-        self.__mPoint1 = point1
-        self.__mPoint2 = point2
+    """Calculates and stores the distance between two Coordinate objects."""
 
-    # find delta of 2 point in Coordinate system
-    @property
-    def deltaPointX(self):
-        return abs(self.__mPoint1.x - self.__mPoint2.x)
-    @property
-    def deltaPointY(self):
-        return abs(self.__mPoint1.y - self.__mPoint2.y)
+    def __init__(self, point1: Coordinate, point2: Coordinate):
+        self.point1 = point1
+        self.point2 = point2
 
     @property
-    def point1(self):
-        return self.__mPoint1
+    def delta_x(self):
+        """Returns the absolute difference in x-coordinates."""
+        return abs(self.point1.x - self.point2.x)
+
     @property
-    def point2(self):
-        return self.__mPoint2
+    def delta_y(self):
+        """Returns the absolute difference in y-coordinates."""
+        return abs(self.point1.y - self.point2.y)
 
     @property
     def distance(self):
-        return math.sqrt(pow(self.deltaPointX, 2) + pow(self.deltaPointY, 2))
+        """Returns the Euclidean distance between the two points."""
+        return math.hypot(self.delta_x, self.delta_y)
 
     @classmethod
-    def calcDistance(cls, p1 : Coordinate, p2 : Coordinate):
-        return math.sqrt((p2.x - p1.x)**2 + (p2.y - p1.y)**2)
+    def calculateDistance(cls, p1: Coordinate, p2: Coordinate):
+        """Calculates the distance between two Coordinate objects."""
+        return cls(p1, p2).distance
+
+    # @classmethod
+    # def calculateDistance2(cls, p1: tuple, p2: tuple):
+    #      """Calculates the distance between two Coordinate objects."""
+    #     p1x = Coordinate(int(p1[0]), int(p1[1]))
+    #     p2x = Coordinate(p2[0], p2[1])
+    #     return cls(p1x, p2x).distance
 
 class ShootAngle:
-    __mVo = 850 # uint (pixel/s)
-    __mG = 600 # uint (pixel/s^2)
-    __mX1 = 0.0
-    __mX2 = 0.0
-    def __init__(self, point1 : Coordinate, point2 : Coordinate):
-        self.__mPoint1and2 = Distance(point1 , point2)
-        self.__mAngle = self.__calculateAngle()
-        assert self.__mAngle > 0 , print(f"Invalid angle calculation.")
+    """Calculates the launch angle for projectile motion."""
+
+    # Class-level constants for initial velocity and gravity
+    VO = 850  # pixels/s
+    G = 600  # pixels/s^2
+
+    def __init__(self, point1: Coordinate, point2: Coordinate):
+        self.distance = Distance(point1, point2)
+        self.angle = self.calculateAngle()
+        assert self.angle > 0, f"Invalid angle calculation: {self.angle}"
 
     def __repr__(self):
-        return f"{self.__class__.__name__} ['point1 {self.__mPoint1and2.point1}, point2 {self.__mPoint1and2.point2}, \
-angle {round(self.__mAngle, 2)} degrees, time {self.convertAngleToTime} s']"
+        return (
+            f"ShootAngle(point1={self.distance.point1}, point2={self.distance.point2}, "
+            f"angle={self.angle:.2f} degrees, time={self.time:.2f} s)"
+        )
+
+    def calculateAngle(self):
+        """Calculates the launch angle using the trajectory equation."""
+        dx = self.distance.delta_x
+        dy = self.distance.delta_y
+
+        # Simplified quadratic equation coefficients
+        a = -0.5 * self.G * (dx ** 2) / (self.VO ** 2)
+        b = dx
+        c = a - dy
+
+        # Calculate discriminant
+        discriminant = b**2 - 4*a*c
+        if discriminant < 0:
+            raise ValueError(f"Equation with no solution. Discriminant = {discriminant}")
+
+        # Calculate the two possible angles
+        tan_theta1 = (-b + math.sqrt(discriminant)) / (2 * a)
+        tan_theta2 = (-b - math.sqrt(discriminant)) / (2 * a)
+
+        # Find the valid angle (positive and in degrees)
+        angle1 = math.degrees(math.atan(tan_theta1))
+        angle2 = math.degrees(math.atan(tan_theta2))
+
+        return angle1 if angle1 > 0 else angle2
+
+    @property
+    def time(self):
+        """Returns the estimated time of flight."""
+        return self.angle / 90  # This calculation seems overly simplified
 
     @classmethod
     def Vo(cls):
-        return cls.__mVo
+        return cls.VO
 
     @classmethod
     def g(cls):
-        return cls.__mG
+        return cls.G
 
-    # solve quadratic equation
-    def __calculateAParameter(self):
-        return (-0.5 * self.__mG * pow(self.__mPoint1and2.deltaPointX, 2)) / pow(self.__mVo, 2)
-    def __calculateBParameter(self):
-        return self.__mPoint1and2.deltaPointX
-    def __calculateCParameter(self):
-        return (-0.5 * self.__mG * pow(self.__mPoint1and2.deltaPointX, 2)) / pow(self.__mVo, 2) - self.__mPoint1and2.deltaPointY
-
-    def __calculateAngle(self):
-        a = self.__calculateAParameter()
-        b = self.__calculateBParameter()
-        c = self.__calculateCParameter()
-
-        delta = b*b - 4*a*c
-        assert delta >= 0 , print(f"equation with no solution. delta = {delta}")
-
-        self.__mX1 = (-b + math.sqrt(delta)) / (2*a)
-        self.__mX2 = (-b - math.sqrt(delta)) / (2*a)
-
-        #find arctan
-        self.__mX1 = math.atan(self.__mX1)
-        self.__mX2 = math.atan(self.__mX2)
-
-        if self.__mX1 >= 0:
-            self.__mX1 = math.degrees(self.__mX1)
-            return self.__mX1
-        elif self.__mX2 >= 0 :
-            self.__mX2 = math.degrees(self.__mX2)
-            return self.__mX2
-        else:
-            print("calculate Angle is incorrect!!!")
-            return 0
-
-    # convert Angle to Shot time
-    @property
-    def convertAngleToTime(self):
-        time = self.__mAngle/90
-        return round(time,2)
-
-    @property
-    def getDistance(self):
-        return self.__mPoint1and2.distance
-
-    @property
-    def angle(self):
-        return self.__mAngle
-
-    @property
-    def point1and2(self):
-        return self.__mPoint1and2
 # Testing
-
-# p1 = Coordinate(1, 2)
-# p2 = Coordinate(3, 4)
-# p3 = ShootAngle(p1, p2)
-# print(p3.getDistance)
+if __name__ == "__main__":
+    p1 = Coordinate(1, 2)
+    p2 = Coordinate(3, 4)
+    shoot_angle = ShootAngle(p1, p2)
+    print(shoot_angle)
+    print(f"Distance: {shoot_angle.distance.distance}")
+    print(f"Distance: {shoot_angle.distance.delta_y}")

@@ -1,5 +1,6 @@
 from pynput.mouse import Button, Controller
 from ShootAngle import Coordinate
+import sys
 import time
 
 class ClickMouse:
@@ -27,8 +28,8 @@ class ClickMouse:
 
 
 # Testing
-
-# p = Coordinate(500, 400)
-# click = ClickMouse(p)
-# click.timeShooting = 3
-# click.shooting
+if __name__ == "__main__":
+    p = Coordinate(817, 393)
+    click = ClickMouse(p)
+    click.timeShooting = float(sys.argv[1])
+    click.shooting
