@@ -37,13 +37,6 @@ class Distance:
         """Calculates the distance between two Coordinate objects."""
         return cls(p1, p2).distance
 
-    # @classmethod
-    # def calculateDistance2(cls, p1: tuple, p2: tuple):
-    #      """Calculates the distance between two Coordinate objects."""
-    #     p1x = Coordinate(int(p1[0]), int(p1[1]))
-    #     p2x = Coordinate(p2[0], p2[1])
-    #     return cls(p1x, p2x).distance
-
 class ShootAngle:
     """Calculates the launch angle for projectile motion."""
 
@@ -52,20 +45,22 @@ class ShootAngle:
     G = 600  # pixels/s^2
 
     def __init__(self, point1: Coordinate, point2: Coordinate):
-        self.distance = Distance(point1, point2)
-        self.angle = self.calculateAngle()
-        assert self.angle > 0, f"Invalid angle calculation: {self.angle}"
+        self.__mDistance = Distance(point1, point2)
+        self.__mAngle = self.calculateAngle()
+        self.__mRightAngle = self.calculateRightAngle()
+        assert self.__mAngle > 0, f"Invalid angle calculation: {self.__mAngle}"
+        assert self.__mRightAngle > 0, f"Invalid right angle calculation: {self.__mRightAngle}"
 
     def __repr__(self):
         return (
-            f"ShootAngle(point1={self.distance.point1}, point2={self.distance.point2}, "
-            f"angle={self.angle:.2f} degrees, time={self.time:.2f} s)"
+            f"ShootAngle(point1={self.__mDistance.point1}, point2={self.__mDistance.point2}, "
+            f"angle={self.__mAngle:.2f}degrees, right_angle={self.__mRightAngle:.2f} degrees, time={self.time:.2f} s)"
         )
 
     def calculateAngle(self):
         """Calculates the launch angle using the trajectory equation."""
-        dx = self.distance.delta_x
-        dy = self.distance.delta_y
+        dx = self.__mDistance.delta_x
+        dy = self.__mDistance.delta_y
 
         # Simplified quadratic equation coefficients
         a = -0.5 * self.G * (dx ** 2) / (self.VO ** 2)
@@ -87,10 +82,30 @@ class ShootAngle:
 
         return angle1 if angle1 > 0 else angle2
 
+    def calculateRightAngle(self):
+        angle =  math.degrees(math.atan(self.__mDistance.delta_y/self.__mDistance.delta_x))
+        return angle
+
     @property
     def time(self):
         """Returns the estimated time of flight."""
-        return self.angle / 90  # This calculation seems overly simplified
+        return self.__mAngle / 90
+
+    @property
+    def rightTime(self):
+        return self.__mRightAngle / 90
+
+    @property
+    def angle(self):
+        return self.__mAngle
+
+    @property
+    def dx(self):
+        return self.__mDistance.delta_x
+
+    @property
+    def dy(self):
+        return self.__mDistance.delta_y
 
     @classmethod
     def Vo(cls):
@@ -100,11 +115,9 @@ class ShootAngle:
     def g(cls):
         return cls.G
 
-# Testing
+# ------------------------------------ Testing -------------------------------------
 if __name__ == "__main__":
     p1 = Coordinate(1, 2)
     p2 = Coordinate(3, 4)
     shoot_angle = ShootAngle(p1, p2)
     print(shoot_angle)
-    print(f"Distance: {shoot_angle.distance.distance}")
-    print(f"Distance: {shoot_angle.distance.delta_y}")

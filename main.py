@@ -8,46 +8,67 @@ import pyautogui
 import time
 import sys
 
-def main():
+image = ProcessImage()
+
+
+def main(headshot : list):
     start_time = time.time()
-    image = ProcessImage()
     screenshot = pyautogui.screenshot()
-    personShot = Coordinate(0, 0)
+
     if image.inputImage(screenshot) == False:
         return
 
-    if image.isShield():
-        personShot = image.getPositionVictim(True)
-    else:
-        personShot = image.getPositionVictim(False)
+    personShot = image.getPositionVictim(True)
+    # if image.isShield():
+    #     personShot = image.getPositionVictim(True)
+    # else:
+    #     personShot = image.getPositionVictim(False)
     shoot = ShootAngle(image.getPositionShooter(), personShot)
 
     image.detectObject(shoot)
 
     if image.isWaterFall():
+        print("time walter fall = ", shoot.time)
+        # print("phi walter fall = ", image.phi)
         exit()
+
     click = ClickMouse(image.getPositionShooter())
-    click.timeShooting = shoot.time
+    print("headshot ", headshot[0])
+    if headshot[0] == 3:
+        click.timeShooting = shoot.rightTime
+    else:
+        click.timeShooting = shoot.time
+
     if image.isBall():
         phi1 = (shoot.time * 360 )/ 3
         phi2 = image.phi
-        phiTarget = 130
+        phiTarget = 50
         delayTime = ((360 - phi1 - phi2 - phiTarget) * 3) / 360
         end_time = time.time()
         executionTime = end_time - start_time
-        delayTime = round((delayTime - executionTime), 2)
-        time.sleep(delayTime)
-        click.shooting
+        print("executionTime = ", executionTime)
+        delayTime = round((delayTime - executionTime), 2) - 0.7
+        print("delayTime ", delayTime)
+        if delayTime > 0:
+            time.sleep(delayTime)
+            click.shooting
+            headshot[0] = headshot[0] + 1
+            time.sleep(2)
     else:
         click.shooting
-    time.sleep(2)
+        headshot[0] = headshot[0] + 1
+        time.sleep(2)
+
 
 if __name__ == "__main__":
+    headshot = [0]
     # print(sys.argv[1])
     if len(sys.argv) <= 1:
         for i in range(1):
-            main()
+            main([3])
     else:
         for i in range(int(sys.argv[1])):
             print(f"------------------Time {i}----------------------")
-            main()
+            main(headshot)
+            if headshot[0] == 4:
+                headshot[0] = 0

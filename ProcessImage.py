@@ -87,7 +87,10 @@ class ProcessImage:
 
     def getPositionVictim(self, headshot: bool):
         x = round(self.__mVictimTopLeftPosition[0] + self.__mWidthVictim * 0.5)
-        y = self.__mHeithScreenLaptop - (self.__mVictimTopLeftPosition[1] + (10 if headshot else 45))
+        if self.__mVictimTopLeftPosition[1] < 500 :
+            y = self.__mHeithScreenLaptop - (self.__mVictimTopLeftPosition[1] + (1 if headshot else 35))
+        else:
+            y = self.__mHeithScreenLaptop - (self.__mVictimTopLeftPosition[1] + (10 if headshot else 45))
         return Coordinate(x, y)
 
     def removeClosePoints(self, points: list):
@@ -157,8 +160,8 @@ class ProcessImage:
         cv2.circle(self.__mImageInput, (x_c, y_c), R, GREEN, 2)
         cv2.circle(self.__mImageInput, (x_c, y_c), 1, RED, 2)
 
-        # cv2.line(self.__mImageInput, (x_c, y_c), (x_c, y_c - R), RED, 2)
-        # cv2.line(self.__mImageInput, (x_c, y_c), (x1, y1), RED, 2)
+        cv2.line(self.__mImageInput, (x_c, y_c), (x_c, y_c - R), RED, 2)
+        cv2.line(self.__mImageInput, (x_c, y_c), (x1, y1), RED, 2)
 
         vector_IA = (x1 - x_c, y1 - y_c)
         vector_IO = (x_c - x_c, (y_c - R) - y_c)
@@ -174,17 +177,19 @@ class ProcessImage:
         cos_phi = dot_product / (magnitude_IA * magnitude_IO)
         phi = np.arccos(cos_phi)
         self.__mPhi = np.degrees(phi)
+        if x1 > x_c:
+            self.__mPhi = -self.__mPhi
         print(f"Phi: {self.__mPhi}")
 
     def drawParabal(self, shootAngle: ShootAngle):
         pos = self.getPositionShooter()
         previousPoint = None
         radianAngle = math.radians(shootAngle.angle)
-        for Xo in range(int(shootAngle.distance.delta_x)):
+        for Xo in range(int(shootAngle.dx)):
             Yo = int((math.tan(radianAngle) * Xo) +
                      (-0.5 * ShootAngle.g() * (1 + pow(math.tan(radianAngle), 2)) * pow(Xo, 2)) /
                      pow(ShootAngle.Vo(), 2))
-            if 0 <= Yo < shootAngle.distance.delta_y:
+            if 0 <= Yo < shootAngle.dy:
                 currentPoint = (Xo + int(pos.x), self.__mHeithScreenLaptop - (Yo + pos.y))
                 if previousPoint is not None:
                     cv2.line(self.__mImageInput, previousPoint, currentPoint, GREEN, 2)
@@ -213,10 +218,10 @@ class ProcessImage:
 
         if self.isWaterFall():
             self.drawObject(self.__mWaterfallTopLeftPosition, self.__mImageWaterfall, BLUE)
-            self.storeImage(self.__mImageInput)
-
-        # if self.isBall() or self.isWaterFall():
             # self.storeImage(self.__mImageInput)
+
+        if self.isBall() or self.isWaterFall():
+            self.storeImage(self.__mImageInput)
 
 # ----------------------------- Testing ------------------------
 
