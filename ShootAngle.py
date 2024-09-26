@@ -48,13 +48,15 @@ class ShootAngle:
         self.__mDistance = Distance(point1, point2)
         self.__mAngle = self.calculateAngle()
         self.__mRightAngle = self.calculateRightAngle()
+        self.__bulletFlightTime = self.bulletFlightTime()
         assert self.__mAngle > 0, f"Invalid angle calculation: {self.__mAngle}"
         assert self.__mRightAngle > 0, f"Invalid right angle calculation: {self.__mRightAngle}"
 
     def __repr__(self):
         return (
-            f"ShootAngle(point1={self.__mDistance.point1}, point2={self.__mDistance.point2}, "
-            f"angle={self.__mAngle:.2f}degrees, right_angle={self.__mRightAngle:.2f} degrees, time={self.time:.2f} s)"
+            f"ShootAngle(point1 = {self.__mDistance.point1}, point2 = {self.__mDistance.point2},"
+            f"angle = {self.__mAngle:.2f} degrees, right_angle = {self.__mRightAngle:.2f} degrees, time = {self.time:.2f} s"
+            f"bullet flight time = {self.__bulletFlightTime} s)"
         )
 
     def calculateAngle(self):
@@ -85,6 +87,15 @@ class ShootAngle:
     def calculateRightAngle(self):
         angle =  math.degrees(math.atan(self.__mDistance.delta_y/self.__mDistance.delta_x))
         return angle
+
+    def bulletFlightTime(self):
+        return self.__mDistance.delta_x/(self.VO * math.cos(math.radians(self.__mAngle)))
+
+    def timeDelayWithBall(self, angle, executionTime):
+        angleClickMouse = (self.time * 360 ) / 3
+        angleTarget = 90
+        delay1 = ((360 - angleClickMouse - angle - angleTarget) * 3) / 360
+        return (delay1 - executionTime - self.__bulletFlightTime)
 
     @property
     def time(self):

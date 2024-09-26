@@ -18,12 +18,13 @@ def main(headshot : list):
     if image.inputImage(screenshot) == False:
         return
 
-    personShot = image.getPositionVictim(True)
+
+    victim = image.getPositionVictim(True)
     # if image.isShield():
-    #     personShot = image.getPositionVictim(True)
+    #     victim = image.getPositionVictim(True)
     # else:
-    #     personShot = image.getPositionVictim(False)
-    shoot = ShootAngle(image.getPositionShooter(), personShot)
+    #     victim = image.getPositionVictim(False)
+    shoot = ShootAngle(image.getPositionShooter(), victim)
 
     image.detectObject(shoot)
 
@@ -40,32 +41,27 @@ def main(headshot : list):
         click.timeShooting = shoot.time
 
     if image.isBall():
-        phi1 = (shoot.time * 360 )/ 3
-        phi2 = image.phi
-        phiTarget = 50
-        delayTime = ((360 - phi1 - phi2 - phiTarget) * 3) / 360
         end_time = time.time()
         executionTime = end_time - start_time
-        print("executionTime = ", executionTime)
-        delayTime = round((delayTime - executionTime), 2) - 0.7
-        print("delayTime ", delayTime)
+        delayTime = shoot.timeDelayWithBall(image.phi, executionTime)
         if delayTime > 0:
             time.sleep(delayTime)
             click.shooting
             headshot[0] = headshot[0] + 1
             time.sleep(2)
+            image.readNumber()
     else:
         click.shooting
         headshot[0] = headshot[0] + 1
         time.sleep(2)
+        image.readNumber()
 
 
 if __name__ == "__main__":
     headshot = [0]
     # print(sys.argv[1])
     if len(sys.argv) <= 1:
-        for i in range(1):
-            main([3])
+        main([3])
     else:
         for i in range(int(sys.argv[1])):
             print(f"------------------Time {i}----------------------")

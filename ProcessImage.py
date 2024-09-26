@@ -4,6 +4,7 @@ import pyautogui
 import time
 import math
 from ShootAngle import *
+import pytesseract
 
 # Define constants for colors
 BLUE = (255, 0, 0)
@@ -48,6 +49,7 @@ class ProcessImage:
         self.__mShieldTopLeftPosition = None
         self.__mBallTopLeftPosition = None
         self.__mWaterfallTopLeftPosition = None
+        self.__mX = 0
 
     def showImage(self, image):
         cv2.imshow("Parabola on Image", image)
@@ -55,6 +57,11 @@ class ProcessImage:
         cv2.destroyAllWindows()
 
     def checkImageTarget(self, imageInput):
+        result = cv2.matchTemplate(self.__mImageInput, imageInput, self.MATCH_METHOD)
+        _, max_val, _, max_loc = cv2.minMaxLoc(result)  # Use _ for unused variables
+        return (max_loc[0] + self.__mX, max_loc[1]) if max_val >= self.THRESHOLD else 0
+
+    def checkImageTargetNoCrop(self, imageInput):
         result = cv2.matchTemplate(self.__mImageInput, imageInput, self.MATCH_METHOD)
         _, max_val, _, max_loc = cv2.minMaxLoc(result)  # Use _ for unused variables
         return max_loc if max_val >= self.THRESHOLD else 0
@@ -65,7 +72,6 @@ class ProcessImage:
         cv2.imwrite(imageFormat, imageStore)
 
     def isBall(self):
-        # Simplify the logic
         return self.__mBallTopLeftPosition is not None and len(self.__mBallTopLeftPosition) > 2
 
     def isShield(self):
@@ -99,7 +105,7 @@ class ProcessImage:
         threshold = 5
         for point in points:
             if Distance.calculateDistance(point, existingPoint) > threshold:
-                filteredPoints.append((point.x, point.y))
+                filteredPoints.append((point.x + self.__mX, point.y))
                 existingPoint = point
         return filteredPoints
 
@@ -110,11 +116,10 @@ class ProcessImage:
         return self.removeClosePoints(listBall) if listBall else []
 
     def checkImageInput(self):
-        self.__mShooterTopLeftPosition = self.checkImageTarget(self.__mImageShooter)
         self.__mVictimTopLeftPosition = self.checkImageTarget(self.__mImageVictim)
         self.__mShieldTopLeftPosition = self.checkImageTarget(self.__mImageShield)
-        self.__mBallTopLeftPosition = self.checkThreeBall(self.__mImageBall)
         self.__mWaterfallTopLeftPosition = self.checkImageTarget(self.__mImageWaterfall)
+        self.__mBallTopLeftPosition = self.checkThreeBall(self.__mImageBall)
 
         return self.isShooter() and self.isVictim()
 
@@ -122,6 +127,14 @@ class ProcessImage:
         screenshot_np = np.array(screenshot)
         self.__mImageInput = cv2.cvtColor(screenshot_np, cv2.COLOR_RGB2BGR)
         assert self.__mImageInput is not None,  print(f"Input image is invalid. Please double check!!!")
+        self.__mShooterTopLeftPosition = self.checkImageTargetNoCrop(self.__mImageShooter)
+        assert self.__mShooterTopLeftPosition is not None,  print(f"Can't find out shooter")
+        y1 = 0
+        y2 = self.__mHeithScreenLaptop
+        x1 = self.__mShooterTopLeftPosition[0] - 50
+        x2 = self.__mShooterTopLeftPosition[0] + 550
+        self.__mImageInput = self.__mImageInput[y1:y2, x1:x2]
+        self.__mX = x1
         return self.checkImageInput()
 
     def inputImageTesting(self, inputImage):
@@ -220,8 +233,24 @@ class ProcessImage:
             self.drawObject(self.__mWaterfallTopLeftPosition, self.__mImageWaterfall, BLUE)
             # self.storeImage(self.__mImageInput)
 
-        if self.isBall() or self.isWaterFall():
-            self.storeImage(self.__mImageInput)
+        # if self.isBall() or self.isWaterFall():
+        self.storeImage(self.__mImageInput)
+
+    def readNumber(self):
+        # Image preprocessing (convert to grayscale and smooth)
+        gray = cv2.cvtColor(self.__mImageInput, cv2.COLOR_BGR2GRAY)
+        blur = cv2.GaussianBlur(gray, (5, 5), 0)
+
+        # Threshold to find regions with numbers
+        _, thresh = cv2.threshold(blur, 127, 255, cv2.THRESH_BINARY_INV)
+
+        pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
+        # recognizing digits
+        digit = pytesseract.image_to_string(thresh, config='--psm 6 digits')
+
+        print(type(digit))
+        print(digit)
+        return digit
 
 # ----------------------------- Testing ------------------------
 
