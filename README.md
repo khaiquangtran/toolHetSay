@@ -9,11 +9,11 @@ pip install pytesseract
 
 ## Run
 Run code once
-'''bash
+```bash
 python main.py
-'''
+```
 
 Run code multi times
 ```bash
-python main.py "times"
+python main.py <times>
 ```
