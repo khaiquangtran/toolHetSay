@@ -47,8 +47,11 @@ def main(headshot : list):
         if delayTime > 0:
             time.sleep(delayTime)
             click.shooting
+            if headshot[0] == 3:
+                time.sleep(4)
+            else:
+                time.sleep(2)
             headshot[0] = headshot[0] + 1
-            time.sleep(2)
             image.readNumber()
     else:
         click.shooting

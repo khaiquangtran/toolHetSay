@@ -100,7 +100,7 @@ class ProcessImage:
         return Coordinate(x, y)
 
     def removeClosePoints(self, points: list):
-        filteredPoints = [(points[0].x, points[0].y)]
+        filteredPoints = [(points[0].x + self.__mX, points[0].y)]
         existingPoint = points[0]
         threshold = 5
         for point in points:
@@ -120,7 +120,6 @@ class ProcessImage:
         self.__mShieldTopLeftPosition = self.checkImageTarget(self.__mImageShield)
         self.__mWaterfallTopLeftPosition = self.checkImageTarget(self.__mImageWaterfall)
         self.__mBallTopLeftPosition = self.checkThreeBall(self.__mImageBall)
-
         return self.isShooter() and self.isVictim()
 
     def inputImage(self, screenshot):
@@ -140,11 +139,20 @@ class ProcessImage:
     def inputImageTesting(self, inputImage):
         assert inputImage is not None, print(f"Input image is invalid. Please double check!!!")
         self.__mImageInput = inputImage
+        self.__mShooterTopLeftPosition = self.checkImageTargetNoCrop(self.__mImageShooter)
+        assert self.__mShooterTopLeftPosition is not None,  print(f"Can't find out shooter")
+        y1 = 0
+        y2 = self.__mHeithScreenLaptop
+        x1 = self.__mShooterTopLeftPosition[0] - 50
+        x2 = self.__mShooterTopLeftPosition[0] + 550
+        self.__mImageInput = self.__mImageInput[y1:y2, x1:x2]
+        self.__mX = x1
         return self.checkImageInput()
 
     def drawObject(self, position, sizeImage, color):
-        bottom_right = (position[0] + sizeImage.shape[1], position[1] + sizeImage.shape[0])
-        cv2.rectangle(self.__mImageInput, position, bottom_right, color, 2)
+        changePosition = (position[0] - self.__mX, position[1])
+        bottom_right = (changePosition[0] + sizeImage.shape[1], changePosition[1] + sizeImage.shape[0])
+        cv2.rectangle(self.__mImageInput, changePosition, bottom_right, color, 2)
 
     def drawCircle(self, points):
         """Draws a circle on the image given three points.
@@ -152,9 +160,9 @@ class ProcessImage:
         Args:
             points: A list of three tuples, each representing (x, y) coordinates of a point on the circle.
         """
-        x1, y1 = points[0]
-        x2, y2 = points[1]
-        x3, y3 = points[2]
+        x1, y1 = points[0][0] - self.__mX , points[0][1]
+        x2, y2 = points[1][0] - self.__mX , points[1][1]
+        x3, y3 = points[2][0] - self.__mX , points[2][1]
 
         # Calculate determinants efficiently
         a = x1 * (y2 - y3)
@@ -203,7 +211,7 @@ class ProcessImage:
                      (-0.5 * ShootAngle.g() * (1 + pow(math.tan(radianAngle), 2)) * pow(Xo, 2)) /
                      pow(ShootAngle.Vo(), 2))
             if 0 <= Yo < shootAngle.dy:
-                currentPoint = (Xo + int(pos.x), self.__mHeithScreenLaptop - (Yo + pos.y))
+                currentPoint = (Xo + int(pos.x - self.__mX), self.__mHeithScreenLaptop - (Yo + pos.y))
                 if previousPoint is not None:
                     cv2.line(self.__mImageInput, previousPoint, currentPoint, GREEN, 2)
                 previousPoint = currentPoint
@@ -233,31 +241,40 @@ class ProcessImage:
             self.drawObject(self.__mWaterfallTopLeftPosition, self.__mImageWaterfall, BLUE)
             # self.storeImage(self.__mImageInput)
 
-        # if self.isBall() or self.isWaterFall():
-        self.storeImage(self.__mImageInput)
+        if self.isBall() or self.isWaterFall():
+            self.storeImage(self.__mImageInput)
 
     def readNumber(self):
         # Image preprocessing (convert to grayscale and smooth)
-        gray = cv2.cvtColor(self.__mImageInput, cv2.COLOR_BGR2GRAY)
+        #[y1:y2, x1:x2]
+        y1 = round(self.__mImageInput.shape[0] * 0.09)
+        y2 = round(self.__mImageInput.shape[0] * 0.17)
+        x1 = round(self.__mImageInput.shape[1] * 0.3)
+        x2 = round(self.__mImageInput.shape[1] * 0.65)
+        cropInput = self.__mImageInput[y1:y2, x1:x2]
+        gray = cv2.cvtColor(cropInput, cv2.COLOR_BGR2GRAY)
         blur = cv2.GaussianBlur(gray, (5, 5), 0)
-
+        # self.showImage(cropInput)
+        # self.storeImage(cropInput)
         # Threshold to find regions with numbers
         _, thresh = cv2.threshold(blur, 127, 255, cv2.THRESH_BINARY_INV)
 
+        # print(thresh)
         pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
         # recognizing digits
-        digit = pytesseract.image_to_string(thresh, config='--psm 6 digits')
+        digit =  pytesseract.image_to_string(thresh, config='--oem 3 --psm 6')
 
-        print(type(digit))
-        print(digit)
-        return digit
+        # print(type(digit))
+        print(digit.strip())
+        # return digit
 
 # ----------------------------- Testing ------------------------
 
 if __name__ == "__main__":
     test = ProcessImage()
-    testingImageInput = cv2.imread('./imageSample/haveBall.png')
+    testingImageInput = cv2.imread('./imageSample/full1.png')
     print(test.inputImageTesting(testingImageInput))
     shoot = ShootAngle(test.getPositionShooter(), test.getPositionVictim(True))
     test.detectObject(shoot)
+    # test.readNumber()
     print((shoot.time * 360)/3)
