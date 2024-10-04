@@ -4,10 +4,9 @@ Use the package manager [pip](https://pypi.org/) to install
 pip install opencv-python
 pip install PyAutoGUI
 pip install np
-pip install pytesseract
 ```
 
-## Run
+## Usage
 Run code once
 ```bash
 python main.py

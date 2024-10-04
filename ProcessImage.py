@@ -4,7 +4,6 @@ import pyautogui
 import time
 import math
 from ShootAngle import *
-import pytesseract
 
 # Define constants for colors
 BLUE = (255, 0, 0)
@@ -256,32 +255,7 @@ class ProcessImage:
     def height(self):
         return self.__mVictimTopLeftPosition[1]
 
-    def readNumber(self):
-        # Image preprocessing (convert to grayscale and smooth)
-        #[y1:y2, x1:x2]
-        y1 = round(self.__mImageInput.shape[0] * 0.09)
-        y2 = round(self.__mImageInput.shape[0] * 0.17)
-        x1 = round(self.__mImageInput.shape[1] * 0.3)
-        x2 = round(self.__mImageInput.shape[1] * 0.65)
-        cropInput = self.__mImageInput[y1:y2, x1:x2]
-        gray = cv2.cvtColor(cropInput, cv2.COLOR_BGR2GRAY)
-        blur = cv2.GaussianBlur(gray, (5, 5), 0)
-        # self.showImage(cropInput)
-        # self.storeImage(cropInput)
-        # Threshold to find regions with numbers
-        _, thresh = cv2.threshold(blur, 127, 255, cv2.THRESH_BINARY_INV)
-
-        # print(thresh)
-        pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
-        # recognizing digits
-        digit =  pytesseract.image_to_string(thresh, config='--oem 3 --psm 6')
-
-        # print(type(digit))
-        print(digit.strip())
-        # return digit
-
 # ----------------------------- Testing ------------------------
-
 if __name__ == "__main__":
     test = ProcessImage()
     testingImageInput = cv2.imread('./imageSample/full1.png')

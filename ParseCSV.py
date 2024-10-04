@@ -1,7 +1,7 @@
 import csv
 
 class ParseCSV:
-    FIELD = ['height', 'ball', 'waterfall', 'length', 'fever', 'time']
+    FIELD = ['height', 'ball', 'waterfall', 'length', 'shield', 'time']
     def __init__(self) -> None:
         pass
 
@@ -10,17 +10,17 @@ class ParseCSV:
         return value == 'True'
 
     @classmethod
-    def checkData(cls, height: int, ball: bool, waterfall: bool, length: int, fever: bool):
+    def checkData(cls, height: int, ball: bool, waterfall: bool, length: int, shield: bool):
         with open('data.csv', 'r') as file:
             reader = csv.DictReader(file)
             #filter data
             data = [
                 line for line in reader
-                if (int(line['height']) >= (height - 1) and int(line['height']) <= (height + 1))  # Sửa điều kiện logic
+                if int(line['height']) >= (height - 1) and int(line['height']) <= (height + 1)
                 and cls.str2bool(line['ball']) == ball
                 and cls.str2bool(line['waterfall']) == waterfall
-                and int(line['length']) == length
-                and cls.str2bool(line['fever']) == fever
+                and int(line['length']) >= (length - 1) and int(line['length']) <= (length + 1)
+                and cls.str2bool(line['shield']) == shield
             ]
 
             if len(data) == 1:
@@ -29,8 +29,8 @@ class ParseCSV:
                 return 0
 
     @classmethod
-    def saveData(cls, height : int, ball : bool, waterfall : bool, length : int, fever : bool, time : float):
-        isDataExit = cls.checkData(height, ball, waterfall, length, fever)
+    def saveData(cls, height : int, ball : bool, waterfall : bool, length : int, shield : bool, time : float):
+        isDataExit = cls.checkData(height, ball, waterfall, length, shield)
         if isDataExit == 0:
             time = round(time, 4)
             with open('data.csv', 'a', newline='') as new_file:
@@ -40,10 +40,10 @@ class ParseCSV:
                     'ball': ball,
                     'waterfall': waterfall,
                     'length': length,
-                    'fever' : fever,
+                    'shield' : shield,
                     'time' : time
                 })
-            print(f"height {height} || ball {ball} || waterfall {waterfall} || length {length} || fever {fever} || time {time}")
+            print(f"height {height} || ball {ball} || waterfall {waterfall} || length {length} || shield {shield} || time {time}")
 
 #-----------Testing---------------
 if __name__ == "__main__":
