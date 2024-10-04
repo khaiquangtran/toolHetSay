@@ -218,6 +218,7 @@ class ProcessImage:
 
     @property
     def phi(self):
+        self.drawCircle(self.__mBallTopLeftPosition)
         return self.__mPhi
 
     def detectObject(self, shootAngle: ShootAngle):
@@ -243,6 +244,17 @@ class ProcessImage:
 
         if self.isBall() or self.isWaterFall():
             self.storeImage(self.__mImageInput)
+
+    @property
+    def length(self):
+        if self.isWaterFall():
+            return self.__mVictimTopLeftPosition[0] - self.__mWaterfallTopLeftPosition[0]
+        else:
+            return 0
+
+    @property
+    def height(self):
+        return self.__mVictimTopLeftPosition[1]
 
     def readNumber(self):
         # Image preprocessing (convert to grayscale and smooth)
@@ -277,4 +289,4 @@ if __name__ == "__main__":
     shoot = ShootAngle(test.getPositionShooter(), test.getPositionVictim(True))
     test.detectObject(shoot)
     # test.readNumber()
-    print((shoot.time * 360)/3)
+    # print((shoot.time * 360)/3)
