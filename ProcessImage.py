@@ -24,20 +24,25 @@ class ProcessImage:
         # Load template images only once in the constructor
         self.__mImageShooter = cv2.imread(self.SHOOTER_PATH)
         assert self.__mImageShooter is not None, print(f"Can't open {self.SHOOTER_PATH}")
+        self.__mImageShooter = cv2.cvtColor(self.__mImageShooter, cv2.COLOR_BGR2GRAY)
         self.__mHeightShooter, self.__mWidthShooter = self.__mImageShooter.shape[:2]  # Use tuple unpacking
 
         self.__mImageVictim = cv2.imread(self.PERSON_SHOT_PATH)
         assert self.__mImageVictim is not None, print(f"Can't open {self.PERSON_SHOT_PATH}")
+        self.__mImageVictim = cv2.cvtColor(self.__mImageVictim, cv2.COLOR_BGR2GRAY)
         self.__mHeightVictim, self.__mWidthVictim = self.__mImageVictim.shape[:2]
 
         self.__mImageShield = cv2.imread(self.SHIELD_PATH)
         assert self.__mImageShield is not None, print(f"Can't open {self.SHIELD_PATH}")
+        self.__mImageShield = cv2.cvtColor(self.__mImageShield, cv2.COLOR_BGR2GRAY)
 
         self.__mImageBall = cv2.imread(self.BALL_PATH)
         assert self.__mImageBall is not None, print(f"Can't open {self.BALL_PATH}")
+        self.__mImageBall = cv2.cvtColor(self.__mImageBall, cv2.COLOR_BGR2GRAY)
 
         self.__mImageWaterfall = cv2.imread(self.WATERFALL_PATH)
         assert self.__mImageWaterfall is not None, print(f"Can't open {self.WATERFALL_PATH}")
+        self.__mImageWaterfall = cv2.cvtColor(self.__mImageWaterfall, cv2.COLOR_BGR2GRAY)
 
         self.__mHeithScreenLaptop = pyautogui.size()[1]
 
@@ -124,6 +129,7 @@ class ProcessImage:
     def inputImage(self, screenshot):
         screenshot_np = np.array(screenshot)
         self.__mImageInput = cv2.cvtColor(screenshot_np, cv2.COLOR_RGB2BGR)
+        self.__mImageInput = cv2.cvtColor(self.__mImageInput, cv2.COLOR_BGR2GRAY)
         # assert self.__mImageInput is not None,  print(f"Input image is invalid. Please double check!!!")
         if self.__mImageInput is None:
             print(f"Input image is invalid. Please double check!!!")
@@ -143,7 +149,7 @@ class ProcessImage:
 
     def inputImageTesting(self, inputImage):
         assert inputImage is not None, print(f"Input image is invalid. Please double check!!!")
-        self.__mImageInput = inputImage
+        self.__mImageInput = cv2.cvtColor(inputImage, cv2.COLOR_BGR2GRAY)
         self.__mShooterTopLeftPosition = self.checkImageTargetNoCrop(self.__mImageShooter)
         assert self.__mShooterTopLeftPosition is not None,  print(f"Can't find out shooter")
         y1 = 0

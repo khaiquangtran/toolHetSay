@@ -18,10 +18,10 @@ class ParseCSV:
             data = [
                 line for line in reader
                 if int(line[cls.FIELD[0]]) >= (height - 1) and int(line[cls.FIELD[0]]) <= (height + 1)
-                and cls.str2bool(line[cls.FIELD[1]]) == ball
-                and cls.str2bool(line[cls.FIELD[2]]) == waterfall
-                and int(line[cls.FIELD[3]]) >= (length - 1) and int(line[cls.FIELD[3]]) <= (length + 1)
-                and cls.str2bool(line[cls.FIELD[4]]) == shield
+                    and cls.str2bool(line[cls.FIELD[1]]) == ball
+                    and cls.str2bool(line[cls.FIELD[2]]) == waterfall
+                    and int(line[cls.FIELD[3]]) >= (length - 1) and int(line[cls.FIELD[3]]) <= (length + 1)
+                    and cls.str2bool(line[cls.FIELD[4]]) == shield
             ]
 
             if len(data) == 1:

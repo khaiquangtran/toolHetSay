@@ -91,8 +91,8 @@ class ShootAngle:
     def bulletFlightTime(self):
         return self.__mDistance.delta_x/(self.VO * math.cos(math.radians(self.__mAngle)))
 
-    def timeDelayWithBall(self, angle, executionTime):
-        angleClickMouse = (self.time * 360 ) / 3
+    def timeDelayWithBall(self, angle, executionTime, time):
+        angleClickMouse = (time * 360 ) / 3
         angleTarget = 90
         delay1 = ((360 - angleClickMouse - angle - angleTarget) * 3) / 360
         return (delay1 - executionTime - self.__bulletFlightTime)
