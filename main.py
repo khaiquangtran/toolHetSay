@@ -17,13 +17,13 @@ def main():
     if image.inputImage(screenshot) == False:
         return
 
+    click = ClickMouse(image.getPositionShooter())
     victim = image.getPositionVictim(image.isShield())
     shoot = ShootAngle(image.getPositionShooter(), victim)
-    click = ClickMouse(image.getPositionShooter())
 
     haveData = ParseCSV.checkData(image.height, image.isBall(), image.isWaterFall(), image.length, image.isShield())
     if haveData:
-        print(f"Use data trainning")
+        print(f"Use trainning data")
         print(f"height {haveData[0]['height']} || ball {haveData[0]['ball']} || waterfall {haveData[0]['waterfall']} || length {haveData[0]['length']} || shield {haveData[0]['shield']} || time {haveData[0]['time']}")
         click.timeShooting = float(haveData[0]['time'])
     else:
@@ -33,8 +33,7 @@ def main():
             exit()
         else:
             click.timeShooting = shoot.time
-
-    ParseCSV.saveData(image.height, image.isBall(), image.isWaterFall(), image.length, image.isShield(), click.timeShooting)
+            ParseCSV.saveData(image.height, image.isBall(), image.isWaterFall(), image.length, image.isShield(), click.timeShooting)
 
     if image.isBall():
         end_time = time.time()
@@ -50,7 +49,6 @@ def main():
     else:
         click.shooting
         time.sleep(2)
-        image.readNumber()
 
 if __name__ == "__main__":
     if len(sys.argv) <= 1:

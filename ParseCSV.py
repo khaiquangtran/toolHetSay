@@ -2,6 +2,7 @@ import csv
 
 class ParseCSV:
     FIELD = ['height', 'ball', 'waterfall', 'length', 'shield', 'time']
+    FILE_NAME = 'data.csv'
     def __init__(self) -> None:
         pass
 
@@ -11,16 +12,16 @@ class ParseCSV:
 
     @classmethod
     def checkData(cls, height: int, ball: bool, waterfall: bool, length: int, shield: bool):
-        with open('data.csv', 'r') as file:
+        with open(cls.FILE_NAME, 'r') as file:
             reader = csv.DictReader(file)
-            #filter data
+            # Filter data
             data = [
                 line for line in reader
-                if int(line['height']) >= (height - 1) and int(line['height']) <= (height + 1)
-                and cls.str2bool(line['ball']) == ball
-                and cls.str2bool(line['waterfall']) == waterfall
-                and int(line['length']) >= (length - 1) and int(line['length']) <= (length + 1)
-                and cls.str2bool(line['shield']) == shield
+                if int(line[cls.FIELD[0]]) >= (height - 1) and int(line[cls.FIELD[0]]) <= (height + 1)
+                and cls.str2bool(line[cls.FIELD[1]]) == ball
+                and cls.str2bool(line[cls.FIELD[2]]) == waterfall
+                and int(line[cls.FIELD[3]]) >= (length - 1) and int(line[cls.FIELD[3]]) <= (length + 1)
+                and cls.str2bool(line[cls.FIELD[4]]) == shield
             ]
 
             if len(data) == 1:
@@ -30,24 +31,28 @@ class ParseCSV:
 
     @classmethod
     def saveData(cls, height : int, ball : bool, waterfall : bool, length : int, shield : bool, time : float):
-        isDataExit = cls.checkData(height, ball, waterfall, length, shield)
-        if isDataExit == 0:
-            time = round(time, 4)
-            with open('data.csv', 'a', newline='') as new_file:
-                writer = csv.DictWriter(new_file, fieldnames=cls.FIELD, delimiter=',')
-                writer.writerow({
-                    'height': height,
-                    'ball': ball,
-                    'waterfall': waterfall,
-                    'length': length,
-                    'shield' : shield,
-                    'time' : time
-                })
-            print(f"height {height} || ball {ball} || waterfall {waterfall} || length {length} || shield {shield} || time {time}")
+        time = round(time, 4)
+        with open(cls.FILE_NAME, 'a', newline='') as file:
+            writer = csv.DictWriter(file, fieldnames=cls.FIELD, delimiter=',')
+            writer.writerow({
+                cls.FIELD[0] : height,
+                cls.FIELD[1] : ball,
+                cls.FIELD[2] : waterfall,
+                cls.FIELD[3] : length,
+                cls.FIELD[4] : shield,
+                cls.FIELD[5] : time
+            })
+        print(f"{cls.FIELD[0]} {height} || "
+              f"{cls.FIELD[1]} {ball} || "
+              f"{cls.FIELD[2]} {waterfall} || "
+              f"{cls.FIELD[3]} {length} || "
+              f"{cls.FIELD[4]} {shield} || "
+              f"{cls.FIELD[5]} {time}")
 
 #-----------Testing---------------
 if __name__ == "__main__":
     test = ParseCSV()
+    print(type(test.FIELD[1]))
     output = test.checkData(517,False,False,0,False)
     print(output[0]['time'])
 

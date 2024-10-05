@@ -124,9 +124,15 @@ class ProcessImage:
     def inputImage(self, screenshot):
         screenshot_np = np.array(screenshot)
         self.__mImageInput = cv2.cvtColor(screenshot_np, cv2.COLOR_RGB2BGR)
-        assert self.__mImageInput is not None,  print(f"Input image is invalid. Please double check!!!")
+        # assert self.__mImageInput is not None,  print(f"Input image is invalid. Please double check!!!")
+        if self.__mImageInput is None:
+            print(f"Input image is invalid. Please double check!!!")
+            return False
         self.__mShooterTopLeftPosition = self.checkImageTargetNoCrop(self.__mImageShooter)
-        assert self.__mShooterTopLeftPosition is not None,  print(f"Can't find out shooter")
+        if self.__mShooterTopLeftPosition is None or self.__mShooterTopLeftPosition == 0:
+            print("Can't find out shooter")
+            return False
+
         y1 = 0
         y2 = self.__mHeithScreenLaptop
         x1 = self.__mShooterTopLeftPosition[0] - 50
